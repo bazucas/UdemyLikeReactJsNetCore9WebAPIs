@@ -37,16 +37,16 @@ services:
     build:
       context: ./client/
       dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL}
     image: udemy_frontend
     ports:
       - "3000:80"
-    environment:
-      REACT_APP_API_URL: ${REACT_APP_API_URL}
     depends_on:
       - webapi
     networks:
       - app-network
-
+      
 volumes:
   sqlserver-data:
   sqlserver-log:
