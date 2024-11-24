@@ -1,0 +1,6 @@
+@Udemy.Server.Api_HostAddress = http://localhost:5139
+
+GET {{Udemy.Server.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

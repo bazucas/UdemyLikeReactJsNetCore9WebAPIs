@@ -1,7 +1,22 @@
+version: '3.9'
+
 services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Express
+    ports:
+      - "5011:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql/data
+    networks:
+      - app-network
+
   webapi:
     build:
-      context: ./backend
+      context: ./server/Udemy.Server.Api/
       dockerfile: Dockerfile
     image: udemy_backend
     ports:
@@ -9,7 +24,7 @@ services:
       - "8081:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=UdemyDB;User=sa;Password=${SA_PASSWORD};
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Udemy;User=sa;Password=${SA_PASSWORD};
     depends_on:
       - sqlserver
     volumes:
@@ -19,31 +34,16 @@ services:
 
   reactjs:
     build:
-      context: ./frontend
+      context: ./client/
       dockerfile: Dockerfile
     image: udemy_frontend
     ports:
       - "3000:80"
       - "3001:443"
     environment:
-      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
     depends_on:
       - webapi
-    networks:
-      - app-network
-
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      ACCEPT_EULA: 'Y'
-      MSSQL_SA_PASSWORD: 'Udemy2025#$'
-      MSSQL_DATA_DIR: /var/opt/mssql/data
-      MSSQL_PID: 'Express' 
-      MSSQL_TCP_PORT: 1433 
-    ports:
-      - "5011:1433"
-    volumes:
-      - sqlserver-data:/var/opt/mssql/data
     networks:
       - app-network
 
