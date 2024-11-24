@@ -14,8 +14,7 @@ services:
       - sqlserver-secrets:/var/opt/mssql/secrets
     networks:
       - app-network
-    user: "0:0" # Força o root para inicializar permissões no volume
-
+    user: "0:0"
 
   webapi:
     build:
@@ -29,6 +28,8 @@ services:
       ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=Udemy;User=sa;Password=${SA_PASSWORD};"
     depends_on:
       - sqlserver
+    volumes:
+      - ../videos:/app/videos
     networks:
       - app-network
 
