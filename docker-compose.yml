@@ -1,0 +1,54 @@
+services:
+  webapi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: udemy_backend
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=UdemyDB;User=sa;Password=${SA_PASSWORD};
+    depends_on:
+      - sqlserver
+    volumes:
+      - ../../videos:/app/wwwroot/videos
+    networks:
+      - app-network
+
+  reactjs:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: udemy_frontend
+    ports:
+      - "3000:80"
+      - "3001:443"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+    depends_on:
+      - webapi
+    networks:
+      - app-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: 'Udemy2025#$'
+      MSSQL_DATA_DIR: /var/opt/mssql/data
+      MSSQL_PID: 'Express' 
+      MSSQL_TCP_PORT: 1433 
+    ports:
+      - "5011:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql/data
+    networks:
+      - app-network
+
+volumes:
+  sqlserver-data:
+
+networks:
+  app-network:
