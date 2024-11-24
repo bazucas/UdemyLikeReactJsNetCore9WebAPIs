@@ -1,18 +1,21 @@
-version: '3.9'
-
 services:
   sqlserver:
+    hostname: sqlserver
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${SA_PASSWORD}
-      - MSSQL_PID=Express
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD}
+      MSSQL_PID: 'Developer'
     ports:
       - "5011:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql/data
+      - sqlserver-log:/var/opt/mssql/log
+      - sqlserver-secrets:/var/opt/mssql/secrets
     networks:
       - app-network
+    user: "0:0" # Força o root para inicializar permissões no volume
+
 
   webapi:
     build:
@@ -21,14 +24,11 @@ services:
     image: udemy_backend
     ports:
       - "8080:8080"
-      - "8081:8081"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Udemy;User=sa;Password=${SA_PASSWORD};
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=Udemy;User=sa;Password=${SA_PASSWORD};"
     depends_on:
       - sqlserver
-    volumes:
-      - ../../videos:/app/wwwroot/videos
     networks:
       - app-network
 
@@ -39,9 +39,8 @@ services:
     image: udemy_frontend
     ports:
       - "3000:80"
-      - "3001:443"
     environment:
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
+      REACT_APP_API_URL: ${REACT_APP_API_URL}
     depends_on:
       - webapi
     networks:
@@ -49,6 +48,8 @@ services:
 
 volumes:
   sqlserver-data:
+  sqlserver-log:
+  sqlserver-secrets:
 
 networks:
   app-network:
